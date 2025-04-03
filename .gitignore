@@ -1,0 +1,206 @@
+# Python/Django Backend
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.db
+*.sqlite3
+*.log
+venv/
+env/
+virtualenv/
+.env
+*.env
+db.sqlite3
+media/
+staticfiles/
+*.bak
+*.swp
+*.swo
+
+# Flutter/Dart Frontend
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+ios/Flutter/.last_build_id
+*.mode
+*.pdb
+*.symbols
+app.*.map.json
+app.*.symbols
+
+# Android specific
+/android/app/debug
+/android/app/profile
+/android/app/release
+*.apk
+*.aab
+*.ap_
+*.jks
+.gradle/
+build/
+local.properties
+
+# iOS specific
+/ios/Flutter/App.framework
+/ios/Flutter/Flutter.framework
+/ios/Flutter/Generated.xcconfig
+/ios/Flutter/app.flutter
+/ios/Flutter/flutter_export_environment.sh
+/ios/Pods/
+*.xcworkspace
+*.xcodeproj/project.xcworkspace
+*.xcodeproj/xcuserdata
+
+# General IDE/Editor files
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.swp
+*.swo
+.DS_Store
+.history
+
+# Miscellaneous
+*.class
+*.log
+*.bak
+.metadata
+node_modules/
+dist/
+*.tmp
+*.temp
+
+# Project-specific exclusions
+# Add any sensitive files or directories specific to cliffs_bakery_rewards here
+
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+
+# Python/Django Backend
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.db
+*.sqlite3
+*.log
+venv/
+env/
+virtualenv/
+.env
+*.env
+db.sqlite3
+media/
+staticfiles/
+*.bak
+*.swp
+*.swo
+
+# Flutter/Dart Frontend
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+build/
+ios/Flutter/.last_build_id
+*.mode
+*.pdb
+*.symbols
+app.*.map.json
+app.*.symbols
+
+# Android specific
+/android/app/debug
+/android/app/profile
+/android/app/release
+*.apk
+*.aab
+*.ap_
+*.jks
+.gradle/
+build/
+local.properties
+
+# iOS specific
+/ios/Flutter/App.framework
+/ios/Flutter/Flutter.framework
+/ios/Flutter/Generated.xcconfig
+/ios/Flutter/app.flutter
+/ios/Flutter/flutter_export_environment.sh
+/ios/Pods/
+*.xcworkspace
+*.xcodeproj/project.xcworkspace
+*.xcodeproj/xcuserdata
+
+# General IDE/Editor files
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.swp
+*.swo
+.DS_Store
+.metadata
+.history
+
+# Miscellaneous
+*.class
+*.log
+*.bak
+node_modules/
+dist/
+*.tmp
+*.temp
