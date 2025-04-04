@@ -1,42 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  runApp(CliffsBakeryRewardsApp());
+  runApp(const MyApp());
 }
 
-class CliffsBakeryRewardsApp extends StatelessWidget {
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Cliff’s Bakery Rewards',
       theme: ThemeData(
-        primaryColor: Color(0xFF00918B),  // Royal Tourqouise
-        scaffoldBackgroundColor: Color(0xFFF5E8C7),  // Cream
-        textTheme: TextTheme(
-          bodyText1: TextStyle(color: Color(0xFF4A2F1A)),  // Darker brown
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            primary: Color(0xFF00918B),
-            onPrimary: Colors.white,
-          ),
-        ),
+        colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFF00918B)),  // Royal Turquoise
+        useMaterial3: true,
       ),
-      home: LoginScreen(),
+      home: const LoginPage(),
     );
   }
 }
 
-class LoginScreen extends StatefulWidget {
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
-  final _emailController = TextEditingController();
+class _LoginPageState extends State<LoginPage> {
+  final _phoneController = TextEditingController();
   String _errorMessage = '';
 
   Future<void> _login() async {
@@ -44,18 +38,16 @@ class _LoginScreenState extends State<LoginScreen> {
       Uri.parse('http://127.0.0.1:8000/api/token/'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
-        'username': _emailController.text,
-        'password': 'AdminP@ss123',  // Replace with actual password
+        'username': _phoneController.text,  // Using phone as username for now
+        'password': 'AdminP@ss123',  // Hardcoded for demo; replace with real password
       }),
     );
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('access_token', data['access']);
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => CouponsScreen()),
+        MaterialPageRoute(builder: (context) => CouponsPage(token: data['access'])),
       );
     } else {
       setState(() => _errorMessage = 'Login failed');
@@ -65,21 +57,37 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Login')),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: const Text('Welcome to Cliff’s Bakery Rewards'),
+      ),
+      body: Center(
         child: Column(
-          children: [
-            TextField(
-              controller: _emailController,
-              decoration: InputDecoration(labelText: 'Email or Phone'),
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: TextField(
+                controller: _phoneController,
+                decoration: const InputDecoration(labelText: 'Phone Number'),
+                keyboardType: TextInputType.phone,
+              ),
             ),
-            SizedBox(height: 16),
             ElevatedButton(
               onPressed: _login,
-              child: Text('Login'),
+              child: const Text('Login'),
             ),
-            if (_errorMessage.isNotEmpty) Text(_errorMessage, style: TextStyle(color: Colors.red)),
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SignupPage()),
+                );
+              },
+              child: const Text('Sign Up'),
+            ),
+            if (_errorMessage.isNotEmpty)
+              Text(_errorMessage, style: const TextStyle(color: Colors.red)),
           ],
         ),
       ),
@@ -87,12 +95,33 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
 
-class CouponsScreen extends StatefulWidget {
+class SignupPage extends StatelessWidget {
+  const SignupPage({super.key});
+
   @override
-  _CouponsScreenState createState() => _CouponsScreenState();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: const Text('Sign Up'),
+      ),
+      body: const Center(
+        child: Text('Signup functionality to be added later'),  // Placeholder
+      ),
+    );
+  }
 }
 
-class _CouponsScreenState extends State<CouponsScreen> {
+class CouponsPage extends StatefulWidget {
+  final String token;
+
+  const CouponsPage({super.key, required this.token});
+
+  @override
+  State<CouponsPage> createState() => _CouponsPageState();
+}
+
+class _CouponsPageState extends State<CouponsPage> {
   List<dynamic> coupons = [];
   int points = 0;
 
@@ -104,11 +133,9 @@ class _CouponsScreenState extends State<CouponsScreen> {
   }
 
   Future<void> _fetchCoupons() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('access_token');
     final response = await http.get(
       Uri.parse('http://127.0.0.1:8000/api/coupons/'),
-      headers: {'Authorization': 'Bearer $token'},
+      headers: {'Authorization': 'Bearer ${widget.token}'},
     );
     if (response.statusCode == 200) {
       setState(() => coupons = jsonDecode(response.body));
@@ -116,11 +143,9 @@ class _CouponsScreenState extends State<CouponsScreen> {
   }
 
   Future<void> _awardPoints() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('access_token');
     final response = await http.post(
       Uri.parse('http://127.0.0.1:8000/api/profiles/1/award_points/'),
-      headers: {'Authorization': 'Bearer $token'},
+      headers: {'Authorization': 'Bearer ${widget.token}'},
     );
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
@@ -131,23 +156,23 @@ class _CouponsScreenState extends State<CouponsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Coupons')),
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: const Text('Your Coupons'),
+      ),
       body: Column(
         children: [
           Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Text('Your Points: $points', style: TextStyle(fontSize: 20)),
+            padding: const EdgeInsets.all(16.0),
+            child: Text('Points: $points', style: const TextStyle(fontSize: 20)),
           ),
           Expanded(
             child: ListView.builder(
               itemCount: coupons.length,
               itemBuilder: (context, index) {
-                return Card(
-                  color: Color(0xFFEAD9A8),  // Light tan
-                  child: ListTile(
-                    title: Text(coupons[index]['title']),
-                    subtitle: Text(coupons[index]['description']),
-                  ),
+                return ListTile(
+                  title: Text(coupons[index]['title']),
+                  subtitle: Text(coupons[index]['description']),
                 );
               },
             ),
