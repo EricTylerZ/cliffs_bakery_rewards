@@ -30,7 +30,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final _phoneController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   String _errorMessage = '';
 
@@ -39,7 +39,7 @@ class _LoginPageState extends State<LoginPage> {
       Uri.parse('http://127.0.0.1:8000/api/token/'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
-        'username': _phoneController.text,
+        'username': _usernameController.text,
         'password': _passwordController.text,
       }),
     );
@@ -51,7 +51,7 @@ class _LoginPageState extends State<LoginPage> {
         MaterialPageRoute(builder: (context) => CouponsPage(token: data['access'])),
       );
     } else {
-      setState(() => _errorMessage = 'Login failed—check phone number and password');
+      setState(() => _errorMessage = 'Login failed—check username and password');
     }
   }
 
@@ -69,9 +69,8 @@ class _LoginPageState extends State<LoginPage> {
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: TextField(
-                controller: _phoneController,
-                decoration: const InputDecoration(labelText: 'Phone Number'),
-                keyboardType: TextInputType.phone,
+                controller: _usernameController,
+                decoration: const InputDecoration(labelText: 'Username'),
               ),
             ),
             Padding(
@@ -104,8 +103,34 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
-class SignupPage extends StatelessWidget {
+class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
+
+  @override
+  State<SignupPage> createState() => _SignupPageState();
+}
+
+class _SignupPageState extends State<SignupPage> {
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
+  String _message = '';
+
+  Future<void> _signup() async {
+    final response = await http.post(
+      Uri.parse('http://127.0.0.1:8000/api/register/'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'username': _usernameController.text,
+        'password': _passwordController.text,
+      }),
+    );
+
+    if (response.statusCode == 201) {
+      setState(() => _message = 'Signup successful! Please log in.');
+    } else {
+      setState(() => _message = 'Signup failed—try a different username');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -114,8 +139,33 @@ class SignupPage extends StatelessWidget {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Sign Up'),
       ),
-      body: const Center(
-        child: Text('Signup functionality to be added later'),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: TextField(
+                controller: _usernameController,
+                decoration: const InputDecoration(labelText: 'Username'),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: TextField(
+                controller: _passwordController,
+                decoration: const InputDecoration(labelText: 'Password'),
+                obscureText: true,
+              ),
+            ),
+            ElevatedButton(
+              onPressed: _signup,
+              child: const Text('Sign Up'),
+            ),
+            if (_message.isNotEmpty)
+              Text(_message, style: const TextStyle(color: Colors.blue)),
+          ],
+        ),
       ),
     );
   }
