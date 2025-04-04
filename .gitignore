@@ -79,6 +79,8 @@ dist/
 
 # Project-specific exclusions
 # Add any sensitive files or directories specific to cliffs_bakery_rewards here
+backend/api/migrations/ 
+
 
 # Miscellaneous
 *.class
