@@ -31,6 +31,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final _phoneController = TextEditingController();
+  final _passwordController = TextEditingController();
   String _errorMessage = '';
 
   Future<void> _login() async {
@@ -38,8 +39,8 @@ class _LoginPageState extends State<LoginPage> {
       Uri.parse('http://127.0.0.1:8000/api/token/'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
-        'username': _phoneController.text,  // Using phone as username for now
-        'password': 'AdminP@ss123',  // Hardcoded for demo; replace with real password
+        'username': _phoneController.text,
+        'password': _passwordController.text,
       }),
     );
 
@@ -50,7 +51,7 @@ class _LoginPageState extends State<LoginPage> {
         MaterialPageRoute(builder: (context) => CouponsPage(token: data['access'])),
       );
     } else {
-      setState(() => _errorMessage = 'Login failed');
+      setState(() => _errorMessage = 'Login failed—check phone number and password');
     }
   }
 
@@ -71,6 +72,14 @@ class _LoginPageState extends State<LoginPage> {
                 controller: _phoneController,
                 decoration: const InputDecoration(labelText: 'Phone Number'),
                 keyboardType: TextInputType.phone,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: TextField(
+                controller: _passwordController,
+                decoration: const InputDecoration(labelText: 'Password'),
+                obscureText: true,
               ),
             ),
             ElevatedButton(
@@ -106,7 +115,7 @@ class SignupPage extends StatelessWidget {
         title: const Text('Sign Up'),
       ),
       body: const Center(
-        child: Text('Signup functionality to be added later'),  // Placeholder
+        child: Text('Signup functionality to be added later'),
       ),
     );
   }
