@@ -473,7 +473,7 @@ class _CouponsPageState extends State<CouponsPage> {
                 crossAxisCount: 2,
                 crossAxisSpacing: 10,
                 mainAxisSpacing: 10,
-                childAspectRatio: 0.6,  // Longer cards
+                childAspectRatio: 0.6,
               ),
               itemCount: coupons.length,
               itemBuilder: (context, index) {
@@ -484,9 +484,9 @@ class _CouponsPageState extends State<CouponsPage> {
                     children: [
                       Image.asset(
                         couponImages[title] ?? 'assets/images/coupon1.png',
-                        height: 120,  // Bigger image
+                        height: 120,
                         width: double.infinity,
-                        fit: BoxFit.contain,  // Full image, no clipping
+                        fit: BoxFit.contain,
                         errorBuilder: (context, error, stackTrace) => const Icon(Icons.image, size: 120),
                       ),
                       Padding(
