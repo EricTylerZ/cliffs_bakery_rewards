@@ -21,6 +21,29 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         profile.award_daily_points()
         return Response({'status': 'points awarded', 'points': profile.points})
 
+    @action(detail=False, methods=['get'])
+    def me(self, request):
+        profile = UserProfile.objects.get(user=request.user)
+        serializer = UserProfileSerializer(profile)
+        return Response({
+            'username': request.user.username,
+            'email': request.user.email,
+            'points': profile.points,
+            'clipped_coupons': profile.get_clipped_coupons(),
+        })
+
+    @action(detail=True, methods=['post'])
+    def clip_coupon(self, request, pk=None):
+        profile = self.get_object()
+        coupon_title = request.data.get('coupon_title')
+        clipped = profile.get_clipped_coupons()
+        if coupon_title and coupon_title not in clipped:
+            clipped.append(coupon_title)
+            profile.set_clipped_coupons(clipped)
+            profile.points += 1  # 1 point per unique coupon
+            profile.save()
+        return Response({'status': 'coupon clipped', 'points': profile.points, 'clipped': clipped})
+
 @api_view(['POST'])
 def register_user(request):
     username = request.data.get('username')

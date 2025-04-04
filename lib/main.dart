@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(const MyApp());
@@ -18,7 +19,45 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         scaffoldBackgroundColor: Color(0xFFF5E8C7),
       ),
-      home: const LoginPage(),
+      home: const AuthCheckPage(),
+    );
+  }
+}
+
+class AuthCheckPage extends StatefulWidget {
+  const AuthCheckPage({super.key});
+
+  @override
+  State<AuthCheckPage> createState() => _AuthCheckPageState();
+}
+
+class _AuthCheckPageState extends State<AuthCheckPage> {
+  @override
+  void initState() {
+    super.initState();
+    _checkLoginStatus();
+  }
+
+  Future<void> _checkLoginStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('access_token');
+    if (token != null) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => CouponsPage(token: token)),
+      );
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginPage()),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Center(child: CircularProgressIndicator()),
     );
   }
 }
@@ -47,6 +86,8 @@ class _LoginPageState extends State<LoginPage> {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('access_token', data['access']);
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => CouponsPage(token: data['access'])),
@@ -73,9 +114,21 @@ class _LoginPageState extends State<LoginPage> {
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(color: Color(0xFF00918B)),
-              child: Text('Cliff’s Bakery Rewards', style: TextStyle(color: Colors.white, fontSize: 24)),
+            DrawerHeader(
+              decoration: const BoxDecoration(color: Color(0xFF00918B)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Image.asset(
+                    'assets/images/menuimage1.png',
+                    height: 80,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => const Icon(Icons.image, size: 80),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text('Cliff’s Bakery Rewards', style: TextStyle(color: Colors.white, fontSize: 24)),
+                ],
+              ),
             ),
             ListTile(
               title: const Text('Coupons'),
@@ -89,44 +142,46 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: TextField(
-                controller: _usernameController,
-                decoration: const InputDecoration(labelText: 'Username'),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: TextField(
+                  controller: _usernameController,
+                  decoration: const InputDecoration(labelText: 'Username'),
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: TextField(
-                controller: _passwordController,
-                decoration: const InputDecoration(labelText: 'Password'),
-                obscureText: true,
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: TextField(
+                  controller: _passwordController,
+                  decoration: const InputDecoration(labelText: 'Password'),
+                  obscureText: true,
+                ),
               ),
-            ),
-            ElevatedButton(
-              onPressed: _login,
-              child: const Text('Login'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SignupPage()),
-                );
-              },
-              child: const Text('Sign Up'),
-            ),
-            const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Text('Call Eric Zosso at (219) 241-3354 to schedule an Interview for your Mobile App Developer role at Natural Grocers'),
-            ),
-            if (_errorMessage.isNotEmpty)
-              Text(_errorMessage, style: const TextStyle(color: Colors.red)),
-          ],
+              ElevatedButton(
+                onPressed: _login,
+                child: const Text('Login'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const SignupPage()),
+                  );
+                },
+                child: const Text('Sign Up'),
+              ),
+              const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text('Call Eric Zosso at (219) 241-3354 to schedule an Interview for your Mobile App Developer role at Natural Grocers'),
+              ),
+              if (_errorMessage.isNotEmpty)
+                Text(_errorMessage, style: const TextStyle(color: Colors.red)),
+            ],
+          ),
         ),
       ),
     );
@@ -179,9 +234,21 @@ class _SignupPageState extends State<SignupPage> {
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(color: Color(0xFF00918B)),
-              child: Text('Cliff’s Bakery Rewards', style: TextStyle(color: Colors.white, fontSize: 24)),
+            DrawerHeader(
+              decoration: const BoxDecoration(color: Color(0xFF00918B)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Image.asset(
+                    'assets/images/menuimage1.png',
+                    height: 80,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => const Icon(Icons.image, size: 80),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text('Cliff’s Bakery Rewards', style: TextStyle(color: Colors.white, fontSize: 24)),
+                ],
+              ),
             ),
             ListTile(
               title: const Text('Coupons'),
@@ -195,35 +262,37 @@ class _SignupPageState extends State<SignupPage> {
         ),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: TextField(
-                controller: _usernameController,
-                decoration: const InputDecoration(labelText: 'Username'),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: TextField(
+                  controller: _usernameController,
+                  decoration: const InputDecoration(labelText: 'Username'),
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: TextField(
-                controller: _passwordController,
-                decoration: const InputDecoration(labelText: 'Password'),
-                obscureText: true,
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: TextField(
+                  controller: _passwordController,
+                  decoration: const InputDecoration(labelText: 'Password'),
+                  obscureText: true,
+                ),
               ),
-            ),
-            ElevatedButton(
-              onPressed: _signup,
-              child: const Text('Sign Up'),
-            ),
-            const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Text('Call Eric Zosso at (219) 241-3354 to schedule an Interview for your Mobile App Developer role at Natural Grocers'),
-            ),
-            if (_message.isNotEmpty)
-              Text(_message, style: const TextStyle(color: Colors.blue)),
-          ],
+              ElevatedButton(
+                onPressed: _signup,
+                child: const Text('Sign Up'),
+              ),
+              const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text('Call Eric Zosso at (219) 241-3354 to schedule an Interview for your Mobile App Developer role at Natural Grocers'),
+              ),
+              if (_message.isNotEmpty)
+                Text(_message, style: const TextStyle(color: Colors.blue)),
+            ],
+          ),
         ),
       ),
     );
@@ -243,14 +312,31 @@ class _CouponsPageState extends State<CouponsPage> {
   List<dynamic> coupons = [];
   List<String> clippedCoupons = [];
   int points = 0;
-  String username = 'User';  // Placeholder
-  String email = 'user@example.com';  // Placeholder
+  String username = '';
+  String email = '';
 
   @override
   void initState() {
     super.initState();
+    _fetchUserData();
     _fetchCoupons();
     _awardPoints();
+  }
+
+  Future<void> _fetchUserData() async {
+    final response = await http.get(
+      Uri.parse('http://127.0.0.1:8000/api/profiles/me/'),
+      headers: {'Authorization': 'Bearer ${widget.token}'},
+    );
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      setState(() {
+        username = data['username'];
+        email = data['email'];
+        points = data['points'];
+        clippedCoupons = List<String>.from(data['clipped_coupons'] ?? []);
+      });
+    }
   }
 
   Future<void> _fetchCoupons() async {
@@ -274,29 +360,38 @@ class _CouponsPageState extends State<CouponsPage> {
     }
   }
 
-  void _logout() {
+  Future<void> _clipCoupon(String title) async {
+    final response = await http.post(
+      Uri.parse('http://127.0.0.1:8000/api/profiles/1/clip_coupon/'),
+      headers: {'Authorization': 'Bearer ${widget.token}', 'Content-Type': 'application/json'},
+      body: jsonEncode({'coupon_title': title}),
+    );
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      setState(() {
+        clippedCoupons = List<String>.from(data['clipped']);
+        points = data['points'];
+      });
+    }
+  }
+
+  Future<void> _logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('access_token');
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => const LoginPage()),
     );
   }
 
-  void _clipCoupon(String title) {
-    setState(() {
-      if (!clippedCoupons.contains(title)) {
-        clippedCoupons.add(title);
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    final List<String> imageUrls = [
-      'https://via.placeholder.com/150?text=10%25+Off+Flour',
-      'https://via.placeholder.com/150?text=15%25+Off+Sugar',
-      'https://via.placeholder.com/150?text=20%25+Off+Cocoa',
-      'https://via.placeholder.com/150?text=25%25+Off+Wheat+Berries',
-    ];
+    final Map<String, String> couponImages = {
+      '10% off 100 lb Sacks of Organic Bread Flour': 'assets/images/coupon1.png',
+      '15% off 50 lb Bags of Regenerative Turbinado Sugar': 'assets/images/coupon2.png',
+      '20% off 50 lb Bags of Raw Organic Cocoa Beans': 'assets/images/coupon3.png',
+      '25% off Wheat Berries': 'assets/images/coupon4.png',
+    };
 
     return Scaffold(
       appBar: AppBar(
@@ -324,9 +419,21 @@ class _CouponsPageState extends State<CouponsPage> {
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(color: Color(0xFF00918B)),
-              child: Text('Cliff’s Bakery Rewards', style: TextStyle(color: Colors.white, fontSize: 24)),
+            DrawerHeader(
+              decoration: const BoxDecoration(color: Color(0xFF00918B)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Image.asset(
+                    'assets/images/menuimage1.png',
+                    height: 80,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => const Icon(Icons.image, size: 80),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text('Cliff’s Bakery Rewards', style: TextStyle(color: Colors.white, fontSize: 24)),
+                ],
+              ),
             ),
             ListTile(
               title: const Text('Coupons'),
@@ -351,60 +458,67 @@ class _CouponsPageState extends State<CouponsPage> {
           ],
         ),
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text('Your Points: $points', style: const TextStyle(fontSize: 20)),
-          ),
-          Expanded(
-            child: GridView.builder(
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text('Bakery Reward Points: $points', style: const TextStyle(fontSize: 20)),
+            ),
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
               padding: const EdgeInsets.all(16.0),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 crossAxisSpacing: 10,
                 mainAxisSpacing: 10,
-                childAspectRatio: 0.8,
+                childAspectRatio: 0.6,  // Longer cards
               ),
               itemCount: coupons.length,
               itemBuilder: (context, index) {
+                final title = coupons[index]['title'];
                 return Card(
                   color: Color(0xFFEAD9A8),
                   child: Column(
                     children: [
-                      Image.network(
-                        index < imageUrls.length ? imageUrls[index] : 'https://via.placeholder.com/150',
-                        height: 80,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => const Icon(Icons.image, size: 80),
+                      Image.asset(
+                        couponImages[title] ?? 'assets/images/coupon1.png',
+                        height: 120,  // Bigger image
+                        width: double.infinity,
+                        fit: BoxFit.contain,  // Full image, no clipping
+                        errorBuilder: (context, error, stackTrace) => const Icon(Icons.image, size: 120),
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Text(
-                          coupons[index]['title'],
+                          title,
                           style: const TextStyle(fontWeight: FontWeight.bold),
                           textAlign: TextAlign.center,
                         ),
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Text(coupons[index]['description'], textAlign: TextAlign.center),
+                        child: Text(
+                          coupons[index]['description'],
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                       ElevatedButton(
-                        onPressed: () => _clipCoupon(coupons[index]['title']),
-                        child: const Text('Clip'),
+                        onPressed: clippedCoupons.contains(title) ? null : () => _clipCoupon(title),
+                        child: Text(clippedCoupons.contains(title) ? 'Clipped' : 'Clip'),
                       ),
                     ],
                   ),
                 );
               },
             ),
-          ),
-          const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Text('Call Eric Zosso at (219) 241-3354 to schedule an Interview for your Mobile App Developer role at Natural Grocers'),
-          ),
-        ],
+            const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Text('Call Eric Zosso at (219) 241-3354 to schedule an Interview for your Mobile App Developer role at Natural Grocers'),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -426,7 +540,9 @@ class ProfilePage extends StatelessWidget {
     required this.clippedCoupons,
   });
 
-  void _logout(BuildContext context) {
+  void _logout(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('access_token');
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => const LoginPage()),
@@ -446,34 +562,36 @@ class ProfilePage extends StatelessWidget {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Your Account', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 16),
-            Text('Username: $username'),
-            Text('Email: $email'),
-            Text('Points: $points'),
-            const SizedBox(height: 16),
-            const Text('Clipped Coupons:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            if (clippedCoupons.isEmpty)
-              const Text('No coupons clipped yet.')
-            else
-              Column(
-                children: clippedCoupons.map((coupon) => Text(coupon)).toList(),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Your Account', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 16),
+              Text('Username: $username'),
+              Text('Email: $email'),
+              Text('Bakery Reward Points: $points'),
+              const SizedBox(height: 16),
+              const Text('Clipped Coupons:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              if (clippedCoupons.isEmpty)
+                const Text('No coupons clipped yet.')
+              else
+                Column(
+                  children: clippedCoupons.map((coupon) => Text(coupon)).toList(),
+                ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => _logout(context),
+                child: const Text('Logout'),
               ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => _logout(context),
-              child: const Text('Logout'),
-            ),
-            const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Text('Call Eric Zosso at (219) 241-3354 to schedule an Interview for your Mobile App Developer role at Natural Grocers'),
-            ),
-          ],
+              const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text('Call Eric Zosso at (219) 241-3354 to schedule an Interview for your Mobile App Developer role at Natural Grocers'),
+              ),
+            ],
+          ),
         ),
       ),
     );
