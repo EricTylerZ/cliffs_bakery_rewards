@@ -8,6 +8,7 @@ import json
 class Coupon(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
+    image = models.CharField(max_length=255, default='coupon1.png')  # New field for image filename
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

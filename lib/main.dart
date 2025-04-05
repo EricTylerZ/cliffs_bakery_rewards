@@ -386,13 +386,6 @@ class _CouponsPageState extends State<CouponsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final Map<String, String> couponImages = {
-      '10% off 100 lb Sacks of Organic Bread Flour': 'assets/images/coupon1.png',
-      '15% off 50 lb Bags of Regenerative Turbinado Sugar': 'assets/images/coupon2.png',
-      '20% off 50 lb Bags of Raw Organic Cocoa Beans': 'assets/images/coupon3.png',
-      '25% off Wheat Berries': 'assets/images/coupon4.png',
-    };
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -477,13 +470,15 @@ class _CouponsPageState extends State<CouponsPage> {
               ),
               itemCount: coupons.length,
               itemBuilder: (context, index) {
-                final title = coupons[index]['title'];
+                final coupon = coupons[index];
+                final title = coupon['title'];
+                final imagePath = 'assets/images/${coupon['image']}';
                 return Card(
                   color: Color(0xFFEAD9A8),
                   child: Column(
                     children: [
                       Image.asset(
-                        couponImages[title] ?? 'assets/images/coupon1.png',
+                        imagePath,
                         height: 120,
                         width: double.infinity,
                         fit: BoxFit.contain,
@@ -500,7 +495,7 @@ class _CouponsPageState extends State<CouponsPage> {
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
                         child: Text(
-                          coupons[index]['description'],
+                          coupon['description'],
                           textAlign: TextAlign.center,
                         ),
                       ),

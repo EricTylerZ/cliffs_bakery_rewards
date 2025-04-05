@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 class CouponSerializer(serializers.ModelSerializer):
     class Meta:
         model = Coupon
-        fields = '__all__'
+        fields = ['title', 'description', 'image', 'created_at']
 
 class UserProfileSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
