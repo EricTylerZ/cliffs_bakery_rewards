@@ -336,6 +336,8 @@ class _CouponsPageState extends State<CouponsPage> {
         points = data['points'];
         clippedCoupons = List<String>.from(data['clipped_coupons'] ?? []);
       });
+    } else {
+      _logout(context); // Logout on auth failure
     }
   }
 
@@ -346,36 +348,37 @@ class _CouponsPageState extends State<CouponsPage> {
     );
     if (response.statusCode == 200) {
       setState(() => coupons = jsonDecode(response.body));
+    } else {
+      _logout(context); // Logout on auth failure
     }
   }
 
   Future<void> _awardPoints() async {
     final response = await http.post(
-      Uri.parse('http://127.0.0.1:8000/api/profiles/1/award_points/'),
+      Uri.parse('http://127.0.0.1:8000/api/profiles/award_points/'),
       headers: {'Authorization': 'Bearer ${widget.token}'},
     );
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      setState(() => points = data['points']);
+      await _fetchUserData(); // Refresh user data after awarding points
+    } else {
+      _logout(context); // Logout on auth failure
     }
   }
 
   Future<void> _clipCoupon(String title) async {
     final response = await http.post(
-      Uri.parse('http://127.0.0.1:8000/api/profiles/1/clip_coupon/'),
+      Uri.parse('http://127.0.0.1:8000/api/profiles/clip_coupon/'),
       headers: {'Authorization': 'Bearer ${widget.token}', 'Content-Type': 'application/json'},
       body: jsonEncode({'coupon_title': title}),
     );
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      setState(() {
-        clippedCoupons = List<String>.from(data['clipped']);
-        points = data['points'];
-      });
+      await _fetchUserData(); // Refresh user data after clipping
+    } else {
+      _logout(context); // Logout on auth failure
     }
   }
 
-  Future<void> _logout() async {
+  Future<void> _logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('access_token');
     Navigator.pushReplacement(

@@ -9,17 +9,12 @@ from django.contrib.auth.models import User
 class CouponViewSet(viewsets.ModelViewSet):
     queryset = Coupon.objects.all()
     serializer_class = CouponSerializer
+    permission_classes = [IsAuthenticated]
 
 class UserProfileViewSet(viewsets.ModelViewSet):
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated]
-
-    @action(detail=True, methods=['post'])
-    def award_points(self, request, pk=None):
-        profile = self.get_object()
-        profile.award_daily_points()
-        return Response({'status': 'points awarded', 'points': profile.points})
 
     @action(detail=False, methods=['get'])
     def me(self, request):
@@ -32,15 +27,21 @@ class UserProfileViewSet(viewsets.ModelViewSet):
             'clipped_coupons': profile.get_clipped_coupons(),
         })
 
-    @action(detail=True, methods=['post'])
-    def clip_coupon(self, request, pk=None):
-        profile = self.get_object()
+    @action(detail=False, methods=['post'])  # Collection-level, no ID needed
+    def award_points(self, request):
+        profile = UserProfile.objects.get(user=request.user)
+        profile.award_daily_points()
+        return Response({'status': 'points awarded', 'points': profile.points})
+
+    @action(detail=False, methods=['post'])  # Collection-level, no ID needed
+    def clip_coupon(self, request):
+        profile = UserProfile.objects.get(user=request.user)
         coupon_title = request.data.get('coupon_title')
         clipped = profile.get_clipped_coupons()
         if coupon_title and coupon_title not in clipped:
             clipped.append(coupon_title)
             profile.set_clipped_coupons(clipped)
-            profile.points += 1  # 1 point per unique coupon
+            profile.points += 1
             profile.save()
         return Response({'status': 'coupon clipped', 'points': profile.points, 'clipped': clipped})
 
